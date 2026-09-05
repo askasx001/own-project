@@ -227,7 +227,7 @@ def _unwrap_list(payload):
 # ---------------------------------------------------------------------------
 
 def list_managers():
-    payload = _request("GET", "/managers", params={"limit": 500})
+    payload = _request("GET", "/managers", params={"pageLimit": 200})
     return [_manager_to_row(r) for r in _unwrap_list(payload)]
 
 
@@ -263,7 +263,7 @@ def delete_manager(manager_pk):
 # ---------------------------------------------------------------------------
 
 def list_employees(location=None):
-    payload = _request("GET", "/employees", params={"limit": 1000})
+    payload = _request("GET", "/employees", params={"pageLimit": 200})
     rows = [_employee_to_row(r) for r in _unwrap_list(payload)]
     if location:
         rows = [r for r in rows if r["location"] == location]
@@ -310,7 +310,7 @@ def delete_employee(employee_pk):
 # ---------------------------------------------------------------------------
 
 def list_scenarios(assigned_batch=None):
-    payload = _request("GET", "/callScenarios", params={"limit": 1000})
+    payload = _request("GET", "/callScenarios", params={"pageLimit": 200})
     rows = [_scenario_to_row(r) for r in _unwrap_list(payload)]
     if assigned_batch:
         rows = [r for r in rows if r["assigned_batch"] == assigned_batch]
@@ -347,7 +347,7 @@ CALLSIMULATION_LIST_BROKEN = True  # flip to False once SUP-13 is fixed
 def list_simulations(employee_id=None, scenario_id=None):
     if CALLSIMULATION_LIST_BROKEN:
         return []
-    payload = _request("GET", "/callSimulations", params={"limit": 1000})
+    payload = _request("GET", "/callSimulations", params={"pageLimit": 200})
     rows = [_simulation_to_row(r) for r in _unwrap_list(payload)]
     if employee_id:
         rows = [r for r in rows if r["employee_id"] == employee_id]
