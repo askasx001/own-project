@@ -1,0 +1,155 @@
+
+{% extends "base.html" %}
+
+{% block title %}Mock Call Result{% endblock %}
+
+{% block head %}
+
+<style>
+
+    .result-page { max-width: 900px; margin: 0 auto; }
+
+    .result-panel { overflow: hidden; background: #fff; border: 1px solid #dbe3ec; border-radius: 16px; box-shadow: 0 18px 45px rgba(15, 23, 42, .12); }
+
+    .result-header { padding: 28px 32px; color: #fff; background: #172033; }
+
+    .result-header h1 { margin: 0 0 6px; color: #fff; font-size: 1.8rem; }
+
+    .result-header p { margin: 0; color: #c9d4e4; }
+
+    .result-body { padding: 28px 32px; }
+
+    .score-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-bottom: 26px; }
+
+    .score-card { padding: 18px; background: #f5f7fb; border: 1px solid #e2e8f0; border-radius: 10px; }
+
+    .score-card span { display: block; margin-bottom: 8px; color: #718096; font-size: .78rem; font-weight: 700; text-transform: uppercase; }
+
+    .score-card strong { color: #172033; font-size: 1.7rem; }
+
+    .score-card.overall { background: #ecfeff; border-color: #a5f3fc; }
+
+    .result-section { padding: 20px 0; border-top: 1px solid #e2e8f0; }
+
+    .result-section h2 { margin: 0 0 12px; color: #172033; font-size: 1.05rem; }
+
+    .result-section p, .result-section li { color: #526174; line-height: 1.6; }
+
+    .result-section ul { margin: 0; padding-left: 20px; }
+
+    .answer-preview { padding: 14px 16px; color: #526174; background: #f8fafc; border-left: 3px solid #4f91c9; border-radius: 4px; white-space: pre-wrap; }
+
+    .verdict { display: inline-block; margin-bottom: 18px; padding: 8px 12px; color: #166534; background: #dcfce7; border-radius: 7px; font-weight: 800; }.verdict.fail { color: #991b1b; background: #fee2e2; }
+
+    .rubric-table { width: 100%; border-collapse: collapse; font-size: .84rem; }.rubric-table th { color: #526174; background: #f5f7fb; font-size: .72rem; text-align: left; text-transform: uppercase; }.rubric-table th, .rubric-table td { padding: 10px; border-bottom: 1px solid #e2e8f0; vertical-align: top; }.rubric-table td strong { color: #27364d; }.rubric-met { color: #166534; font-weight: 800; }.rubric-not-met { color: #991b1b; font-weight: 800; }.fatal-flag { color: #991b1b; font-weight: 800; }.category-list { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }.category-score { padding: 12px; background: #f5f7fb; border-radius: 8px; }.category-score span { display: block; color: #718096; font-size: .72rem; }.category-score strong { color: #172033; font-size: 1.15rem; }
+
+    .result-actions { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 24px; }
+
+    .step-list { margin: 0; padding-left: 24px; }
+
+    .step-list li { padding: 8px 0 8px 4px; }
+
+    .step-list strong { color: #27364d; }
+
+    @media (max-width: 600px) { .result-header, .result-body { padding: 22px 18px; }.score-grid { grid-template-columns: 1fr; } }
+
+</style>
+
+{% endblock %}
+
+{% block content %}
+
+<div class="result-page">
+
+    <a href="{{ url_for('employee_dashboard') }}" class="back-btn">← Dashboard</a>
+
+    <div class="result-panel">
+
+        <header class="result-header">
+
+            <h1>Mock call result</h1>
+
+            <p>{{ employee_name }} · {{ assigned_mock.scenario_types if assigned_mock else 'Training call' }}</p>
+
+        </header>
+
+        <main class="result-body">
+
+            <div class="score-grid"><div class="score-card"><span>Soft skills</span><strong>{{ report.soft_skills_score }}%</strong></div><div class="score-card"><span>Business critical</span><strong>{{ report.business_critical_score }}%</strong></div><div class="score-card overall"><span>Final weighted score</span><strong>{{ report.final_weighted_score or report.overall_score }}%</strong></div></div>
+
+            <div class="verdict {{ 'fail' if report.verdict == 'Fail' else '' }}">Verdict: {{ report.verdict or 'Pending' }}{% if report.fatal_flag %} · Fatal auto-fail{% endif %}</div>
+
+            <p><strong>Final Weighted Score:</strong> {{ report.final_weighted_score or report.overall_score }}% · <strong>Fatal Flag Status:</strong> {{ 'Yes' if report.fatal_flag else 'No' }} · <strong>Overall Verdict:</strong> {{ report.verdict or 'Pending' }}</p>
+
+            {% if report.category_scores %}<section class="result-section"><h2>Category-wise score</h2><div class="category-list">{% for category, score in report.category_scores.items() %}<div class="category-score"><span>{{ category }}</span><strong>{{ score }}%</strong></div>{% endfor %}</div></section>{% endif %}
+
+            <section class="result-section">
+
+                <h2>Manager summary</h2>
+
+                <p>{{ report.manager_summary }}</p>
+
+            </section>
+
+            <section class="result-section">
+
+                <h2>Complete step-by-step call</h2>
+
+                {% if conversation %}
+
+                <ol class="step-list">
+
+                    {% for step in conversation %}
+
+                    <li><strong>{{ 'Caller' if step.role in ['customer', 'caller'] else 'You' }}:</strong> {{ step.text }}</li>
+
+                    {% endfor %}
+
+                </ol>
+
+                {% else %}<p>No call steps were recorded.</p>{% endif %}
+
+            </section>
+
+            <section class="result-section">
+
+                <h2>What to keep improving</h2>
+
+                <ul>
+
+                    {% for point in report.main_points %}
+
+                    <li>{{ point }}</li>
+
+                    {% endfor %}
+
+                </ul>
+
+            </section>
+
+            <section class="result-section">
+
+                <h2>Your response</h2>
+
+                <div class="answer-preview">{{ report.answer_preview }}</div>
+
+            </section>
+
+            {% if report.parameters %}<section class="result-section"><h2>Parameter evaluation</h2><table class="rubric-table"><thead><tr><th>Category / parameter</th><th>Score</th><th>Evidence / justification</th><th>Fatal violation?</th></tr></thead><tbody>{% for parameter in report.parameters %}<tr><td><strong>{{ parameter.name }}</strong><br><small>{{ parameter.category }} · {{ parameter.weight }}%</small></td><td class="{{ 'rubric-met' if parameter.met else 'rubric-not-met' }}">{{ parameter.score }}</td><td>{{ parameter.evidence }}</td><td>{% if parameter.fatal_violation %}<span class="fatal-flag">Yes</span>{% else %}No{% endif %}</td></tr>{% endfor %}</tbody></table>{% if report.fatal_violations %}<p class="fatal-flag" style="margin-top:14px;">Fatal Flag Status: Yes. Fatal parameter violated: {{ report.fatal_violations|join(', ') }}. Final score is 0%.</p>{% else %}<p style="margin-top:14px;">Fatal Flag Status: No. No fatal parameter was violated.</p>{% endif %}</section>{% endif %}
+
+            <div class="result-actions">
+
+                <a href="{{ url_for('employee_dashboard') }}" class="btn">Back to dashboard</a>
+
+                <a href="{{ url_for('mockline_dashboard') }}" class="btn btn-secondary">Try another call</a>
+
+            </div>
+
+        </main>
+
+    </div>
+
+</div>
+
+{% endblock %}
+
