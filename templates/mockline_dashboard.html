@@ -1,0 +1,121 @@
+
+{% extends "base.html" %}
+
+{% block title %}Mock Call Training{% endblock %}
+
+{% block head %}
+
+<style>
+
+    .call-page { max-width: 1180px; margin: 0 auto; }
+
+    .dashboard-panel { display: grid; grid-template-columns: 1fr 1fr 1.4fr; gap: 18px; align-items: center; margin-bottom: 20px; padding: 18px 20px; background: #fff; border: 1px solid #dbe3ec; border-radius: 12px; box-shadow: 0 8px 20px rgba(15, 23, 42, .06); }
+
+    .dashboard-stat span { display: block; color: #718096; font-size: .72rem; font-weight: 700; text-transform: uppercase; }.dashboard-stat strong { display: block; margin-top: 4px; color: #172033; font-size: 1.35rem; }
+
+    .dashboard-history { min-width: 0; }.dashboard-history-head { display: flex; justify-content: space-between; gap: 10px; margin-bottom: 7px; color: #718096; font-size: .72rem; font-weight: 700; text-transform: uppercase; }.dashboard-history a { color: #256da5; text-decoration: none; font-size: .8rem; }.dashboard-history-list { display: flex; gap: 8px; overflow-x: auto; }.dashboard-history-item { min-width: 145px; padding: 8px 10px; background: #f5f7fb; border: 1px solid #e2e8f0; border-radius: 7px; }.dashboard-history-item strong { display: block; overflow: hidden; color: #27364d; font-size: .78rem; text-overflow: ellipsis; white-space: nowrap; }.dashboard-history-item small { color: #155e75; font-weight: 800; }
+
+    .call-window { overflow: hidden; background: #fff; border: 1px solid #dbe3ec; border-radius: 16px; box-shadow: 0 18px 45px rgba(15, 23, 42, .12); }
+
+    .call-header { display: flex; justify-content: space-between; align-items: center; gap: 16px; padding: 15px 20px; color: #f8fafc; background: #172033; }
+
+    .call-title { display: flex; align-items: center; gap: 12px; }.call-title strong { display: block; }.call-title small { color: #aebbd0; }
+
+    .call-live { display: flex; align-items: center; gap: 8px; color: #b7f7d1; font-size: .82rem; font-weight: 700; }.live-dot { width: 9px; height: 9px; border-radius: 50%; background: #35d07f; box-shadow: 0 0 0 4px rgba(53, 208, 127, .18); }
+
+    .call-body { display: grid; grid-template-columns: minmax(0, 1fr) 300px; min-height: 610px; }.conversation-panel { display: flex; flex-direction: column; min-width: 0; background: #f5f7fb; }
+
+    .participant-stage { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; padding: 18px; background: #e9eef6; }.participant { position: relative; min-height: 130px; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #fff; background: #293850; border-radius: 12px; }.participant.employee { background: #334d67; }
+
+    .avatar { display: grid; place-items: center; width: 58px; height: 58px; margin-bottom: 9px; border-radius: 50%; color: #172033; background: #f7c873; font-size: 1.2rem; font-weight: 800; }.employee .avatar { color: #fff; background: #4f91c9; }.participant small { color: #c9d4e4; }.speaking { position: absolute; right: 12px; top: 12px; display: none; width: 9px; height: 9px; border-radius: 50%; background: #48e38c; }.participant.is-speaking .speaking { display: block; }
+
+    .transcript { flex: 1; min-height: 260px; max-height: 390px; overflow-y: auto; padding: 22px 24px; }.message { display: flex; gap: 10px; max-width: 88%; margin-bottom: 17px; animation: message-in .22s ease-out; }.message.employee { margin-left: auto; flex-direction: row-reverse; }.message-avatar { flex: 0 0 30px; display: grid; place-items: center; width: 30px; height: 30px; border-radius: 50%; color: #fff; background: #4f91c9; font-size: .68rem; font-weight: 800; }.message.customer .message-avatar { color: #172033; background: #f7c873; }.message-content { min-width: 0; }.message-label { display: block; margin: 1px 0 4px; color: #718096; font-size: .72rem; font-weight: 700; }.message.employee .message-label { text-align: right; }.message-bubble { padding: 11px 14px; color: #243247; background: #fff; border: 1px solid #e0e7f0; border-radius: 4px 14px 14px 14px; line-height: 1.45; white-space: pre-wrap; overflow-wrap: anywhere; }.message.employee .message-bubble { color: #fff; background: #256da5; border: 0; border-radius: 14px 4px 14px 14px; }
+
+    .typing { display: none; align-items: center; gap: 8px; padding: 0 24px 12px; color: #718096; font-size: .78rem; }.typing.visible { display: flex; }.typing span { display: inline-block; width: 5px; height: 5px; border-radius: 50%; background: #718096; animation: bounce 1s infinite; }.typing span:nth-child(2) { animation-delay: .15s; }.typing span:nth-child(3) { animation-delay: .3s; }
+
+    .composer { padding: 16px 20px 18px; background: #fff; border-top: 1px solid #e2e8f0; }.composer textarea { width: 100%; min-height: 76px; resize: vertical; padding: 12px 14px; border: 1px solid #cbd5e1; border-radius: 10px; font: inherit; line-height: 1.4; }.composer textarea:focus { outline: 0; border-color: #3182ce; box-shadow: 0 0 0 3px rgba(49, 130, 206, .14); }.composer-actions { display: flex; justify-content: space-between; align-items: center; gap: 10px; margin-top: 10px; }.composer-hint { color: #718096; font-size: .78rem; }
+
+    .call-sidebar { padding: 20px; background: #fff; border-left: 1px solid #e2e8f0; }.sidebar-heading { margin: 0 0 15px; color: #172033; font-size: .95rem; }.call-detail { padding: 12px 0; border-bottom: 1px solid #edf1f6; }.call-detail span { display: block; margin-bottom: 4px; color: #718096; font-size: .72rem; text-transform: uppercase; letter-spacing: .04em; }.call-detail strong { color: #27364d; font-size: .9rem; }.score-panel { margin-top: 24px; padding-top: 18px; border-top: 1px solid #e2e8f0; }.score-row { display: flex; justify-content: space-between; padding: 8px 0; color: #526174; font-size: .85rem; }.score-row strong { color: #172033; }.overall-score { display: flex; justify-content: space-between; align-items: center; margin-top: 8px; padding: 12px; color: #155e75; background: #ecfeff; border-radius: 9px; font-weight: 800; }.empty-call { padding: 70px 24px; text-align: center; color: #718096; }
+
+    @keyframes message-in { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } } @keyframes bounce { 0%, 80%, 100% { transform: translateY(0); } 40% { transform: translateY(-4px); } }
+
+    @media (max-width: 820px) { .dashboard-panel { grid-template-columns: 1fr 1fr; }.dashboard-history { grid-column: 1 / -1; }.call-body { grid-template-columns: 1fr; }.call-sidebar { border-left: 0; border-top: 1px solid #e2e8f0; }.transcript { max-height: 360px; } } @media (max-width: 520px) { .dashboard-panel { grid-template-columns: 1fr; }.dashboard-history { grid-column: auto; }.call-header { align-items: flex-start; flex-direction: column; }.participant-stage { padding: 10px; gap: 8px; }.participant { min-height: 110px; }.composer-actions { align-items: stretch; flex-direction: column; }.composer-actions .btn { width: 100%; } }
+
+</style>
+
+{% endblock %}
+
+{% block content %}
+
+<div class="call-page">
+
+    <a href="{{ url_for('employee_dashboard') }}" class="back-btn">← Dashboard</a>
+
+    <section class="dashboard-panel">
+
+        <div class="dashboard-stat"><span>Calls in queue</span><strong>{{ assigned_mocks|length }}</strong></div>
+
+        <div class="dashboard-stat"><span>Average score</span><strong>{{ "%.1f"|format(average_score) }}/10</strong></div>
+
+        <div class="dashboard-history"><div class="dashboard-history-head"><span>Previous mock calls</span><a href="{{ url_for('employee_dashboard') }}">See all results</a></div>{% if previous_calls %}<div class="dashboard-history-list">{% for call in previous_calls %}<a class="dashboard-history-item" href="{{ url_for('mockline_result', simulation_id=call.id) }}"><strong>{{ call.title or 'Mock call' }}</strong><small>{{ "%.1f"|format(call.overall_score or 0) }}/10</small></a>{% endfor %}</div>{% else %}<span style="color:#718096;font-size:.8rem;">No completed calls yet.</span>{% endif %}</div>
+
+    </section>
+
+    <div class="call-window">
+
+        <header class="call-header"><div class="call-title"><span style="font-size:1.4rem;">☎</span><div><strong>MockLine training call</strong><small>Secure practice session</small></div></div><div class="call-live"><span class="live-dot"></span><span id="call-state-label">Ready to connect</span><span id="timer">00:00</span></div></header>
+
+        <div class="call-body">
+
+            <main class="conversation-panel">
+
+                {% if assigned_mock %}
+
+                <div id="transcript" class="transcript"><div class="empty-call">Your caller is ready. Select <strong>Answer call</strong> to begin.</div></div><div id="typing-indicator" class="typing"><span></span><span></span><span></span> Caller is speaking...</div>
+
+                <div class="composer"><textarea id="typed-answer-box" disabled placeholder="Your response will appear here. Answer the call first, then type a complete reply..."></textarea><div class="composer-actions"><span class="composer-hint">Type your answer, or use your microphone.</span><div style="display:flex; gap:8px;"><button id="mic-btn" type="button" class="btn btn-secondary" onclick="toggleRecording()" disabled>🎤 Mic</button><button id="send-btn" type="button" class="btn" onclick="sendEmployeeTurn()" disabled>Send answer</button></div></div></div>
+
+                {% else %}<div class="empty-call"><h2>No mock calls assigned</h2><p>Ask your manager to assign a training call.</p></div>{% endif %}
+
+            </main>
+
+            <aside class="call-sidebar"><button id="answer-btn" type="button" class="btn" onclick="answerCall()" {% if not assigned_mock %}disabled{% endif %} style="width:100%; background:#159957;">Answer call</button><button id="hang-btn" type="button" class="btn btn-danger" onclick="hangupCall()" disabled style="width:100%; margin-top:10px;">End call</button><button id="submit-btn" type="button" class="btn" onclick="submitMockReport()" disabled style="width:100%; margin-top:10px; background:#172033;">Submit evaluation</button><div class="score-panel"><h3 class="sidebar-heading">Evaluation</h3><div class="score-row"><span>Soft skills</span><strong id="soft-score">Pending</strong></div><div class="score-row"><span>Business critical</span><strong id="business-score">Pending</strong></div><div class="overall-score"><span>Overall</span><strong id="overall-score">Pending</strong></div></div><div id="feedback-panel" class="score-panel"><h3 class="sidebar-heading">Feedback</h3><p style="color:#718096; font-size:.82rem; line-height:1.5;">Submit the completed conversation to receive an evaluation.</p></div></aside>
+
+        </div>
+
+    </div>
+
+</div>
+
+<form id="submission-form" method="POST" action="{{ url_for('submit_mock_call') }}" style="display:none;"><input type="hidden" name="scenario_id" value="{{ assigned_mock.id if assigned_mock else '' }}"><input type="hidden" name="answer" id="answer-submit"><input type="hidden" name="conversation_log" id="conversation-log"></form>
+
+<script>
+
+let callState = 'idle'; let callSeconds = 0; let timerInterval = null; let conversationLog = []; let turn = 0; let recognition = null; let isRecording = false; const scenarioId = '{{ assigned_mock.id if assigned_mock else '' }}';
+
+function setSpeaking(participant, active) { const element = document.getElementById(participant + '-participant'); if (element) element.classList.toggle('is-speaking', active); }
+
+function addMessage(role, text) { const transcript = document.getElementById('transcript'); const empty = transcript.querySelector('.empty-call'); if (empty) empty.remove(); const message = document.createElement('div'); message.className = 'message ' + role; message.innerHTML = '<div class="message-avatar">' + (role === 'customer' ? 'C' : 'Y') + '</div><div class="message-content"><span class="message-label">' + (role === 'customer' ? 'Caller' : 'You') + '</span><div class="message-bubble"></div></div>'; message.querySelector('.message-bubble').textContent = text; transcript.appendChild(message); transcript.scrollTop = transcript.scrollHeight; }
+
+function showCallerMessage(text) { setSpeaking('customer', true); addMessage('customer', text); speakText(text); setTimeout(() => setSpeaking('customer', false), 900); }
+
+function startTimer() { timerInterval = setInterval(() => { callSeconds++; document.getElementById('timer').textContent = String(Math.floor(callSeconds / 60)).padStart(2, '0') + ':' + String(callSeconds % 60).padStart(2, '0'); }, 1000); }
+
+async function answerCall() { if (callState !== 'idle') return; callState = 'active'; document.getElementById('answer-btn').disabled = true; document.getElementById('hang-btn').disabled = false; document.getElementById('typed-answer-box').disabled = false; document.getElementById('send-btn').disabled = false; document.getElementById('mic-btn').disabled = false; document.getElementById('call-state-label').textContent = 'Connected'; startTimer(); document.getElementById('typing-indicator').classList.add('visible'); try { const response = await fetch('{{ url_for("start_mock_call") }}', {method:'POST', body:new URLSearchParams({scenario_id:scenarioId})}); const data = await response.json(); if (!response.ok) throw new Error(data.error); turn = data.turn || 0; conversationLog.push({role:'customer', text:data.caller_message, timestamp:new Date().toLocaleTimeString()}); showCallerMessage(data.caller_message); } catch (error) { addMessage('customer', 'The caller could not connect: ' + error.message); } document.getElementById('typing-indicator').classList.remove('visible'); }
+
+async function sendEmployeeTurn() { const box = document.getElementById('typed-answer-box'); const answer = box.value.trim(); if (!answer || callState !== 'active') return; document.getElementById('send-btn').disabled = true; setSpeaking('employee', true); addMessage('employee', answer); conversationLog.push({role:'employee', text:answer, timestamp:new Date().toLocaleTimeString()}); box.value = ''; document.getElementById('typing-indicator').classList.add('visible'); try { const response = await fetch('{{ url_for("continue_mock_call") }}', {method:'POST', body:new URLSearchParams({scenario_id:scenarioId, turn:turn, answer:answer, conversation:JSON.stringify(conversationLog.slice(-4))})}); const data = await response.json(); if (!response.ok) throw new Error(data.error); turn = data.turn; conversationLog.push({role:'customer', text:data.caller_message, timestamp:new Date().toLocaleTimeString()}); showCallerMessage(data.caller_message); } catch (error) { addMessage('customer', 'Connection issue: ' + error.message); } finally { document.getElementById('typing-indicator').classList.remove('visible'); document.getElementById('send-btn').disabled = false; setSpeaking('employee', false); } }
+
+function toggleRecording() { const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition; if (!SpeechRecognition) { alert('Speech recognition is not supported in this browser.'); return; } if (isRecording) { recognition.stop(); return; } recognition = new SpeechRecognition(); recognition.lang = '{{ assigned_mock.language if assigned_mock and assigned_mock.language else "en-US" }}'; recognition.interimResults = false; recognition.onstart = () => { isRecording = true; document.getElementById('mic-btn').textContent = '⏹ Stop'; }; recognition.onresult = event => { document.getElementById('typed-answer-box').value = event.results[0][0].transcript; sendEmployeeTurn(); }; recognition.onend = () => { isRecording = false; document.getElementById('mic-btn').textContent = '🎤 Mic'; }; recognition.start(); }
+
+function hangupCall() { if (callState !== 'active') return; callState = 'completed'; clearInterval(timerInterval); if (recognition) recognition.stop(); document.getElementById('call-state-label').textContent = 'Call ended'; document.getElementById('hang-btn').disabled = true; document.getElementById('typed-answer-box').disabled = true; document.getElementById('send-btn').disabled = true; document.getElementById('mic-btn').disabled = true; document.getElementById('submit-btn').disabled = false; calculateScores(); }
+
+function calculateScores() { document.getElementById('feedback-panel').innerHTML = '<h3 class="sidebar-heading">Feedback</h3><p style="color:#526174;font-size:.82rem;line-height:1.5;">Evaluation is calculated after you submit the complete conversation.</p>'; }
+
+function speakText(text) { if ('speechSynthesis' in window) { const utterance = new SpeechSynthesisUtterance(text); utterance.lang = '{{ assigned_mock.language if assigned_mock and assigned_mock.language else "en-US" }}'; speechSynthesis.cancel(); speechSynthesis.speak(utterance); } }
+
+function submitMockReport() { document.getElementById('answer-submit').value = conversationLog.filter(item => item.role === 'employee').map(item => item.text).join(' ') || 'The employee completed the mock call.'; document.getElementById('conversation-log').value = JSON.stringify(conversationLog); document.getElementById('submission-form').submit(); }
+
+</script>
+
+{% endblock %}
+

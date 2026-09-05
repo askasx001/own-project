@@ -1,0 +1,121 @@
+
+{% extends "base.html" %}
+
+{% block title %}Manager Dashboard{% endblock %}
+
+{% block content %}
+
+<h1>Manager Dashboard — {{ location }}</h1>
+
+<div class="stat-grid">
+
+    <div class="stat-card">
+
+        <div class="stat-value">{{ employees|length }}</div>
+
+        <div class="stat-label">Agents in this location</div>
+
+    </div>
+
+    <div class="stat-card">
+
+        <div class="stat-value">{{ assignments|length }}</div>
+
+        <div class="stat-label">Mock call assignments</div>
+
+    </div>
+
+</div>
+
+<div class="card">
+
+    <h2 style="margin-top:0;">Quick Actions</h2>
+
+    <div style="display:flex; gap: 14px; flex-wrap: wrap;">
+
+        <a href="{{ url_for('manager_mockline') }}" class="btn">☎️ Assign Mock Calls</a>
+
+        <a href="{{ url_for('manager_employees') }}" class="btn btn-secondary">👤 Manage Employees</a>
+
+        <a href="{{ url_for('manager_results') }}" class="btn btn-secondary">📊 View Results</a>
+
+    </div>
+
+</div>
+
+<h2>Agents ({{ location }})</h2>
+
+{% if employees %}
+
+<table class="table">
+
+    <thead><tr><th>Employee ID</th><th>Name</th><th>Department</th><th>Email</th></tr></thead>
+
+    <tbody>
+
+        {% for emp in employees %}
+
+        <tr>
+
+            <td>{{ emp.employee_id }}</td>
+
+            <td>{{ emp.name }}</td>
+
+            <td>{{ emp.department or '-' }}</td>
+
+            <td>{{ emp.email or '-' }}</td>
+
+        </tr>
+
+        {% endfor %}
+
+    </tbody>
+
+</table>
+
+{% else %}
+
+<div class="empty-state">No agents added yet for this location.</div>
+
+{% endif %}
+
+<h2>Recent Mock Call Assignments</h2>
+
+{% if assignments %}
+
+<table class="table">
+
+    <thead><tr><th>Title</th><th>Scenario</th><th>Tone</th><th>Language</th><th>Date</th></tr></thead>
+
+    <tbody>
+
+        {% for a in assignments[:10] %}
+
+        <tr>
+
+            <td>{{ a.title }}</td>
+
+            <td>{{ a.scenario_types }}</td>
+
+            <td>{{ a.communication_styles }}</td>
+
+            <td>{{ a.language }}</td>
+
+            <td>{{ a.created_at }}</td>
+
+        </tr>
+
+        {% endfor %}
+
+    </tbody>
+
+</table>
+
+{% else %}
+
+<div class="empty-state">No mock calls assigned yet.</div>
+
+{% endif %}
+
+{% endblock %}
+

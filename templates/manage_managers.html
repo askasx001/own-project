@@ -1,0 +1,59 @@
+
+{% extends "base.html" %}
+
+{% block title %}Managers{% endblock %}
+
+{% block content %}
+
+<a href="{{ url_for('admin_dashboard') }}" class="back-btn">← Back to Dashboard</a>
+
+<h1>Managers</h1>
+
+<a href="{{ url_for('new_manager') }}" class="btn" style="margin-bottom: 20px; display:inline-block;">+ Add Manager</a>
+
+{% if managers %}
+
+<table class="table">
+
+    <thead><tr><th>Manager ID</th><th>Username</th><th>Location</th><th>Added</th><th></th></tr></thead>
+
+    <tbody>
+
+        {% for m in managers %}
+
+        <tr>
+
+            <td>{{ m.manager_id }}</td>
+
+            <td>{{ m.username }}</td>
+
+            <td>{{ m.location }}</td>
+
+            <td>{{ m.created_at }}</td>
+
+            <td>
+
+                <form method="POST" action="{{ url_for('delete_manager', manager_pk=m.id) }}" onsubmit="return confirm('Delete this manager?');" style="display:inline;">
+
+                    <button type="submit" class="btn btn-danger" style="padding: 6px 12px; font-size: 12px;">Delete</button>
+
+                </form>
+
+            </td>
+
+        </tr>
+
+        {% endfor %}
+
+    </tbody>
+
+</table>
+
+{% else %}
+
+<div class="empty-state">No managers added yet.</div>
+
+{% endif %}
+
+{% endblock %}
+

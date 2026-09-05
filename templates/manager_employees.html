@@ -1,0 +1,85 @@
+
+{% extends "base.html" %}
+
+{% block title %}Employees — Manager{% endblock %}
+
+{% block content %}
+
+<a href="{{ url_for('manager_dashboard') }}" class="back-btn">← Back to Dashboard</a>
+
+<h1>My Employees — {{ location }}</h1>
+
+<a href="{{ url_for('manager_new_employee') }}" class="btn" style="margin-bottom: 20px; display:inline-block;">+ Add Employee</a>
+
+<div class="search-bar" style="margin-bottom: 20px;">
+
+    <input type="text" id="search" placeholder="Search by name, ID, or email..." style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px;">
+
+</div>
+
+{% if employees %}
+
+<table class="table" id="employees-table">
+
+    <thead><tr><th>Employee ID</th><th>Name</th><th>Department</th><th>Email</th><th></th></tr></thead>
+
+    <tbody>
+
+        {% for emp in employees %}
+
+        <tr class="employee-row">
+
+            <td>{{ emp.employee_id }}</td>
+
+            <td>{{ emp.name }}</td>
+
+            <td>{{ emp.department or '-' }}</td>
+
+            <td>{{ emp.email or '-' }}</td>
+
+            <td>
+
+                <form method="POST" action="{{ url_for('manager_delete_employee', employee_pk=emp.id) }}" onsubmit="return confirm('Delete this employee?');" style="display:inline;">
+
+                    <button type="submit" class="btn btn-danger" style="padding: 6px 12px; font-size: 12px;">Delete</button>
+
+                </form>
+
+            </td>
+
+        </tr>
+
+        {% endfor %}
+
+    </tbody>
+
+</table>
+
+{% else %}
+
+<div class="empty-state">No employees in your location yet.</div>
+
+{% endif %}
+
+<script>
+
+document.getElementById('search').addEventListener('input', function(e) {
+
+    const query = e.target.value.toLowerCase();
+
+    const rows = document.querySelectorAll('.employee-row');
+
+    rows.forEach(row => {
+
+        const text = row.textContent.toLowerCase();
+
+        row.style.display = text.includes(query) ? '' : 'none';
+
+    });
+
+});
+
+</script>
+
+{% endblock %}
+

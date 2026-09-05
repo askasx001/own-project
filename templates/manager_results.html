@@ -1,0 +1,91 @@
+
+{% extends "base.html" %}
+
+{% block title %}Results{% endblock %}
+
+{% block content %}
+
+<style>
+
+    .manager-summary { max-width: 360px; }
+
+    .call-steps { margin-top: 10px; }
+
+    .call-steps summary { color: #256da5; cursor: pointer; font-weight: 700; }
+
+    .call-steps ol { margin: 10px 0 0; padding-left: 22px; color: #526174; }
+
+    .call-steps li { padding: 5px 0; line-height: 1.45; }
+
+    .call-steps strong { color: #27364d; }
+
+</style>
+
+<h1>Results — {{ location }}</h1>
+
+<h2>Mock Call Reports</h2>
+
+{% if mock_reports %}
+
+<table class="table">
+
+    <thead><tr><th>Agent</th><th>Overall</th><th>Soft Skills</th><th>Business Critical</th><th>Summary and call steps</th><th>Completed</th></tr></thead>
+
+    <tbody>
+
+        {% for m in mock_reports %}
+
+        <tr>
+
+            <td>{{ m.employee_name }} ({{ m.employee_id }})</td>
+
+            <td><span class="badge badge-purple">{{ m.overall_score }}</span></td>
+
+            <td>{{ m.soft_skills_score }}</td>
+
+            <td>{{ m.business_critical_score }}</td>
+
+            <td class="manager-summary">
+
+                <div>{{ m.manager_summary }}</div>
+
+                <details class="call-steps">
+
+                    <summary>View complete step-by-step call</summary>
+
+                    {% if m.conversation %}
+
+                    <ol>
+
+                        {% for step in m.conversation %}
+
+                        <li><strong>{{ 'Caller' if step.role in ['customer', 'caller'] else 'Employee' }}:</strong> {{ step.text }}</li>
+
+                        {% endfor %}
+
+                    </ol>
+
+                    {% else %}<p>No call steps recorded.</p>{% endif %}
+
+                </details>
+
+            </td>
+
+            <td>{{ m.completed_at }}</td>
+
+        </tr>
+
+        {% endfor %}
+
+    </tbody>
+
+</table>
+
+{% else %}
+
+<div class="empty-state">No mock call reports yet for this location.</div>
+
+{% endif %}
+
+{% endblock %}
+

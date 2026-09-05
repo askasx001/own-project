@@ -1,0 +1,69 @@
+
+{% extends "base.html" %}
+
+{% block title %}New Manager{% endblock %}
+
+{% block content %}
+
+<a href="{{ url_for('manage_managers') }}" class="back-btn">← Back to Managers</a>
+
+<h1>Add Manager</h1>
+
+<div class="card">
+
+    <form method="POST">
+
+        <div class="form-grid">
+
+            <div class="form-group">
+
+                <label for="manager_id">Manager ID *</label>
+
+                <input type="text" id="manager_id" name="manager_id" placeholder="e.g. MGR-CHN" required>
+
+            </div>
+
+            <div class="form-group">
+
+                <label for="username">Username *</label>
+
+                <input type="text" id="username" name="username" placeholder="e.g. manager_chennai" required>
+
+            </div>
+
+            <div class="form-group">
+
+                <label for="password">Password *</label>
+
+                <input type="password" id="password" name="password" required>
+
+            </div>
+
+            <div class="form-group">
+
+                <label for="location">Location *</label>
+
+                <select id="location" name="location" required>
+
+                    <option value="" disabled selected>Select a state</option>
+
+                    {% for state in indian_states %}
+
+                    <option value="{{ state }}">{{ state }}</option>
+
+                    {% endfor %}
+
+                </select>
+
+            </div>
+
+        </div>
+
+        <button type="submit" class="btn">Add Manager</button>
+
+    </form>
+
+</div>
+
+{% endblock %}
+

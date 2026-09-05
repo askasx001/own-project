@@ -1,0 +1,85 @@
+
+{% extends "base.html" %}
+
+{% block title %}Employee Dashboard{% endblock %}
+
+{% block head %}
+
+<style>
+
+    .employee-page { max-width: 1100px; margin: 0 auto; }
+
+    .dashboard-header { display: flex; justify-content: space-between; align-items: end; gap: 20px; margin-bottom: 24px; }
+
+    .dashboard-header h1 { margin-bottom: 6px; }
+
+    .dashboard-header p { color: #6b7280; }
+
+    .summary-grid { display: grid; grid-template-columns: repeat(2, minmax(180px, 240px)); gap: 16px; margin-bottom: 28px; }
+
+    .summary-card { padding: 20px; background: #fff; border: 1px solid #e2e8f0; border-radius: 12px; box-shadow: 0 8px 20px rgba(15, 23, 42, .06); }
+
+    .summary-card span { display: block; color: #6b7280; font-size: .78rem; font-weight: 700; text-transform: uppercase; }
+
+    .summary-card strong { display: block; margin-top: 8px; color: #172033; font-size: 1.8rem; }
+
+    .section { margin-bottom: 28px; }
+
+    .section h2 { margin: 0 0 12px; font-size: 1.2rem; }
+
+    .history-filters { display: grid; grid-template-columns: repeat(2, minmax(180px, 1fr)); gap: 12px; margin-bottom: 14px; padding: 16px; background: #fff; border: 1px solid #e2e8f0; border-radius: 12px; }
+
+    .history-filters label { display: block; margin-bottom: 6px; color: #526174; font-size: .78rem; font-weight: 700; }.history-filters select, .history-filters input[type="date"] { width: 100%; padding: 10px 12px; color: #27364d; background: #fff; border: 1px solid #cbd5e1; border-radius: 8px; font: inherit; }
+
+    .queue-list, .history-list { overflow: hidden; background: #fff; border: 1px solid #e2e8f0; border-radius: 12px; }
+
+    .queue-row, .history-row { display: flex; justify-content: space-between; align-items: center; gap: 18px; padding: 16px 18px; border-bottom: 1px solid #edf1f6; }
+
+    .queue-row:last-child, .history-row:last-child { border-bottom: 0; }
+
+    .row-info { min-width: 0; }
+
+    .row-info strong { display: block; color: #27364d; }
+
+    .row-info small { display: block; margin-top: 5px; color: #718096; }
+
+    .row-action { flex: 0 0 auto; }
+
+    .score { color: #155e75; font-weight: 800; white-space: nowrap; }
+
+    .profile-card { padding: 20px; background: #fff; border: 1px solid #e2e8f0; border-radius: 12px; }
+
+    .profile-details { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; color: #6b7280; font-size: .88rem; }
+
+    .profile-details strong { display: block; margin-top: 4px; color: #27364d; }
+
+    .empty-state { padding: 28px; background: #fff; border: 1px solid #e2e8f0; border-radius: 12px; }
+
+    @media (max-width: 700px) { .summary-grid, .profile-details, .history-filters { grid-template-columns: 1fr 1fr; }.dashboard-header { align-items: flex-start; flex-direction: column; }.queue-row, .history-row { align-items: flex-start; flex-direction: column; }.row-action { width: 100%; }.row-action .btn { width: 100%; } }
+
+</style>
+
+{% endblock %}
+
+{% block content %}
+
+{% if employee %}
+
+<div class="employee-page">
+
+    <div class="dashboard-header"><div><h1>Welcome, {{ employee.name }}</h1><p>Review your mock-call performance and completed results.</p></div></div>
+
+    <div class="summary-grid"><div class="summary-card"><span>Completed calls</span><strong>{{ previous_calls|length }}</strong></div><div class="summary-card"><span>Average score</span><strong>{{ "%.1f"|format(average_score) }}/10</strong></div></div>
+
+    <section class="section"><h2>Previous mock calls</h2><form class="history-filters" method="GET" action="{{ url_for('employee_dashboard') }}"><div><label for="scenario-filter">Scenario</label><select id="scenario-filter" name="scenario" onchange="this.form.submit()"><option value="">All scenarios</option>{% for scenario in scenario_options %}<option value="{{ scenario }}" {% if scenario == selected_scenario %}selected{% endif %}>{{ scenario }}</option>{% endfor %}</select></div><div><label for="date-filter">Completed date</label><input id="date-filter" type="date" name="date" value="{{ selected_date }}" onchange="this.form.submit()"></div></form>{% if previous_calls %}<div class="history-list">{% for call in previous_calls %}<div class="history-row"><div class="row-info"><strong>{{ call.title or 'Mock call' }}</strong><small>{{ call.scenario_types or 'Training call' }} · Completed {{ call.completed_at }}</small></div><span class="score">{{ "%.1f"|format(call.overall_score or 0) }}/10</span><a href="{{ url_for('mockline_result', simulation_id=call.id) }}" class="btn btn-secondary row-action">View result</a></div>{% endfor %}</div>{% else %}<div class="empty-state">No completed calls match these filters.</div>{% endif %}</section>
+
+    <section class="section"><h2>Profile</h2><div class="profile-card"><div class="profile-details"><div>Employee ID<strong>{{ employee.employee_id }}</strong></div><div>Department<strong>{{ employee.department or '-' }}</strong></div><div>Location<strong>{{ employee.location }}</strong></div><div>Email<strong>{{ employee.email or '-' }}</strong></div></div></div></section>
+
+    <section class="section"><h2>Change password</h2><div class="card"><form method="POST" action="{{ url_for('employee_reset_password') }}"><div class="form-grid"><div class="form-group"><label for="current_password">Current password</label><input type="password" id="current_password" name="current_password" required></div><div class="form-group"><label for="new_password">New password</label><input type="password" id="new_password" name="new_password" required></div></div><button type="submit" class="btn">Update password</button></form></div></section>
+
+</div>
+
+{% else %}<div class="empty-state">Employee record not found.</div>{% endif %}
+
+{% endblock %}
+

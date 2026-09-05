@@ -1,0 +1,51 @@
+
+% extends "base.html" %}
+
+{% block title %}All Submissions{% endblock %}
+
+{% block content %}
+
+<a href="{{ url_for('admin_dashboard') }}" class="back-btn">← Back to Dashboard</a>
+
+<h1>All Submissions</h1>
+
+<h2>Mock Call Reports by Location</h2>
+
+{% if submissions_by_location %}
+
+<table class="table">
+
+    <thead><tr><th>Location</th><th>Manager</th><th>Total Reports</th><th>Avg. Score</th><th>Latest</th></tr></thead>
+
+    <tbody>
+
+        {% for location, data in submissions_by_location.items() %}
+
+        <tr>
+
+            <td><strong>{{ location }}</strong></td>
+
+            <td>{{ data.manager or '-' }}</td>
+
+            <td>{{ data.count }}</td>
+
+            <td>{{ "%.1f"|format(data.avg_score) }}</td>
+
+            <td>{{ data.latest or '-' }}</td>
+
+        </tr>
+
+        {% endfor %}
+
+    </tbody>
+
+</table>
+
+{% else %}
+
+<div class="empty-state">No submissions yet.</div>
+
+{% endif %}
+
+{% endblock %}
+

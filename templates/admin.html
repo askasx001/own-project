@@ -1,0 +1,73 @@
+
+{% extends "base.html" %}
+
+{% block title %}Admin Dashboard{% endblock %}
+
+{% block content %}
+
+<h1>Admin Dashboard</h1>
+
+<div class="stat-grid">
+
+    <div class="stat-card"><div class="stat-value">{{ employees|length }}</div><div class="stat-label">Employees</div></div>
+
+    <div class="stat-card"><div class="stat-value">{{ managers|length }}</div><div class="stat-label">Managers</div></div>
+
+    <div class="stat-card"><div class="stat-value">{{ mock_reports|length }}</div><div class="stat-label">Mock Call Reports</div></div>
+
+</div>
+
+<div class="card">
+
+    <h2 style="margin-top:0;">Quick Actions</h2>
+
+    <div style="display:flex; gap: 14px; flex-wrap: wrap;">
+
+        <a href="{{ url_for('manage_managers') }}" class="btn btn-secondary">👔 Manage Managers</a>
+
+        <a href="{{ url_for('manage_employees') }}" class="btn btn-secondary">👤 Manage Employees</a>
+
+        <a href="{{ url_for('admin_submissions') }}" class="btn btn-secondary">📊 Reports</a>
+
+    </div>
+
+</div>
+
+<h2>Recent Mock Call Reports</h2>
+
+{% if mock_reports %}
+
+<table class="table">
+
+    <thead><tr><th>Employee</th><th>Overall Score</th><th>Status</th><th>Completed</th></tr></thead>
+
+    <tbody>
+
+        {% for report in mock_reports %}
+
+        <tr>
+
+            <td>{{ report.employee_name }}</td>
+
+            <td>{{ report.overall_score }} / 10</td>
+
+            <td>{{ report.status|title }}</td>
+
+            <td>{{ report.completed_at }}</td>
+
+        </tr>
+
+        {% endfor %}
+
+    </tbody>
+
+</table>
+
+{% else %}
+
+<div class="empty-state">No mock call reports yet.</div>
+
+{% endif %}
+
+{% endblock %}
+

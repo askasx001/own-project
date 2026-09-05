@@ -1,0 +1,239 @@
+
+{% extends "base.html" %}
+
+{% block title %}Assign Mock Calls{% endblock %}
+
+{% block head %}
+
+<style>
+
+    .checkbox-dropdown { position: relative; }
+
+    .checkbox-dropdown summary { list-style: none; cursor: pointer; padding: 12px 14px; border: 1px solid #d1d5db; border-radius: 10px; background: #fff; }
+
+    .checkbox-dropdown summary::-webkit-details-marker { display: none; }
+
+    .checkbox-dropdown summary::after { content: '▾'; float: right; color: #6b7280; }
+
+    .checkbox-dropdown[open] summary { border-color: #667eea; box-shadow: 0 0 0 3px rgba(102,126,234,0.15); }
+
+    .checkbox-dropdown-menu { display: grid; gap: 8px; position: absolute; z-index: 2; width: 100%; max-height: 240px; overflow-y: auto; margin-top: 6px; padding: 12px; border: 1px solid #d1d5db; border-radius: 10px; background: #fff; box-shadow: 0 10px 24px rgba(15,23,42,0.14); }
+
+    .checkbox-option, .employee-option, .scope-option { display: flex; align-items: center; gap: 9px; font-weight: normal !important; cursor: pointer; }
+
+    .checkbox-option input, .employee-option input { width: 18px; height: 18px; accent-color: #4f46e5; }
+
+    .randomize-option input { width: 24px; height: 24px; accent-color: #4f46e5; }
+
+    .employee-picker { padding: 16px; border: 1px solid #e5e7eb; border-radius: 8px; }
+
+    .scope-options { display: flex; gap: 18px; flex-wrap: wrap; margin-bottom: 14px; }
+
+    .scope-option input { width: 18px; height: 18px; accent-color: #4f46e5; }
+
+    .employee-search { margin-bottom: 12px; }
+
+    .employee-list { max-height: 300px; overflow-y: auto; }
+
+    .employee-option { margin-bottom: 12px; }
+
+    .employee-option[hidden] { display: none; }
+
+</style>
+
+{% endblock %}
+
+{% block content %}
+
+<a href="{{ url_for('manager_dashboard') }}" class="back-btn">← Back to Dashboard</a>
+
+<h1>☎️ Assign Mock Calls</h1>
+
+<div class="card">
+
+    <form method="POST" id="mock-call-form">
+
+        <div class="form-grid">
+
+            <div class="form-group">
+
+                <label for="scenario-menu">Scenario Type *</label>
+
+                <details class="checkbox-dropdown" id="scenario-menu">
+
+                    <summary>Select scenario types</summary>
+
+                    <div class="checkbox-dropdown-menu">
+
+                        {% for option in general_scenario_options %}
+
+                        <label class="checkbox-option"><input type="checkbox" name="scenario_types" value="{{ option }}"> {{ option }}</label>
+
+                        {% endfor %}
+
+                    </div>
+
+                </details>
+
+            </div>
+
+            <div class="form-group">
+
+                <label for="tone-menu">Communication Tone *</label>
+
+                <details class="checkbox-dropdown" id="tone-menu">
+
+                    <summary>Select communication tones</summary>
+
+                    <div class="checkbox-dropdown-menu">
+
+                        {% for tone in ['Angry/Frustrated', 'Polite/Patient', 'Impatient', 'Confused/Uncertain', 'Demanding'] %}
+
+                        <label class="checkbox-option"><input type="checkbox" name="communication_styles" value="{{ tone }}"> {{ tone }}</label>
+
+                        {% endfor %}
+
+                    </div>
+
+                </details>
+
+            </div>
+
+            <div class="form-group">
+
+                <label for="language">Language *</label>
+
+                <select id="language" name="language" required>
+
+                    <option value="English">English</option>
+
+                    <option value="Hindi">Hindi</option>
+
+                    <option value="Telugu">Telugu</option>
+
+                    <option value="Tamil">Tamil</option>
+
+                </select>
+
+            </div>
+
+        </div>
+
+        <div class="form-group">
+
+            <label for="batch_no">Batch Number</label>
+
+            <input type="text" id="batch_no" name="batch_no" value="{{ location }}" placeholder="e.g. B-1043">
+
+        </div>
+
+        <div class="form-group">
+
+            <label>Randomize Call Order</label>
+
+            <label class="checkbox-option randomize-option" style="margin-top:8px;">
+
+                <input type="checkbox" name="randomize_order"> Yes, randomize call order
+
+            </label>
+
+        </div>
+
+        <div class="form-group">
+
+            <label for="description">Additional Instructions</label>
+
+            <textarea id="description" name="description" placeholder="Any special instructions for the agent..." style="min-height:100px;"></textarea>
+
+        </div>
+
+        <h3 style="margin-top: 28px;">Assign to Employees</h3>
+
+        <div class="employee-picker">
+
+            <div class="scope-options">
+
+                <label class="scope-option"><input type="radio" name="assignment_scope" value="selected" checked> One or more employees</label>
+
+                <label class="scope-option"><input type="radio" name="assignment_scope" value="all"> Every employee</label>
+
+            </div>
+
+            <input class="employee-search" type="search" id="employee-search" placeholder="Search by name or user ID" aria-label="Search employees">
+
+            <div class="employee-list" id="employee-list">
+
+            {% if employees %}
+
+                {% for emp in employees %}
+
+                <label class="employee-option" data-employee="{{ (emp.name ~ ' ' ~ emp.employee_id)|lower }}">
+
+                    <input type="checkbox" name="assigned_employees" value="{{ emp.employee_id }}">
+
+                    {{ emp.name }} ({{ emp.employee_id }})
+
+                </label>
+
+                {% endfor %}
+
+            {% else %}
+
+                <p style="color:#999;">No employees in your location yet.</p>
+
+            {% endif %}
+
+            </div>
+
+        </div>
+
+        <div style="margin-top: 24px; display:flex; gap:12px;">
+
+            <button type="submit" class="btn">Assign Calls</button>
+
+            <a href="{{ url_for('manager_dashboard') }}" class="btn btn-secondary">Cancel</a>
+
+        </div>
+
+    </form>
+
+</div>
+
+<script>
+
+    const employeeSearch = document.getElementById('employee-search');
+
+    const employeeOptions = document.querySelectorAll('.employee-option[data-employee]');
+
+    const assignmentScopes = document.querySelectorAll('input[name="assignment_scope"]');
+
+    employeeSearch.addEventListener('input', (event) => {
+
+        const query = event.target.value.trim().toLowerCase();
+
+        employeeOptions.forEach((option) => {
+
+            option.hidden = !option.dataset.employee.includes(query);
+
+        });
+
+    });
+
+    assignmentScopes.forEach((scope) => scope.addEventListener('change', (event) => {
+
+        const selectingAll = event.target.value === 'all';
+
+        employeeSearch.disabled = selectingAll;
+
+        employeeOptions.forEach((option) => {
+
+            option.querySelector('input').disabled = selectingAll;
+
+        });
+
+    }));
+
+</script>
+
+{% endblock %}
+
